@@ -1,19 +1,27 @@
+-- 😈 LEGNA FPS+ AUTO EXEC
+
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+
 local function UltraLowON()
 
 	------------------------------------------------
 	-- 🌫️ CIELO GRIS
 	------------------------------------------------
-	Lighting.TimeOfDay = "12:00:00"
-	Lighting.Ambient = Color3.fromRGB(130,130,130)
-	Lighting.OutdoorAmbient = Color3.fromRGB(130,130,130)
-	Lighting.FogColor = Color3.fromRGB(160,160,160)
-	Lighting.FogEnd = 1e10
-	Lighting.Brightness = 0.8
-	Lighting.GlobalShadows = false
-	Lighting.EnvironmentDiffuseScale = 0
-	Lighting.EnvironmentSpecularScale = 0
+	pcall(function()
+		Lighting.TimeOfDay = "12:00:00"
+		Lighting.Ambient = Color3.fromRGB(130,130,130)
+		Lighting.OutdoorAmbient = Color3.fromRGB(130,130,130)
+		Lighting.FogColor = Color3.fromRGB(160,160,160)
+		Lighting.FogEnd = 1e10
+		Lighting.Brightness = 0.8
+		Lighting.GlobalShadows = false
+		Lighting.EnvironmentDiffuseScale = 0
+		Lighting.EnvironmentSpecularScale = 0
+	end)
 
-	for _,v in pairs(Lighting:GetChildren()) do
+	-- eliminar sky
+	for _,v in ipairs(Lighting:GetChildren()) do
 		if v:IsA("Sky") then
 			v:Destroy()
 		end
@@ -24,16 +32,18 @@ local function UltraLowON()
 	------------------------------------------------
 	local t = workspace:FindFirstChildOfClass("Terrain")
 	if t then
-		t.WaterWaveSize = 0
-		t.WaterWaveSpeed = 0
-		t.WaterReflectance = 0
-		t.WaterTransparency = 0
+		pcall(function()
+			t.WaterWaveSize = 0
+			t.WaterWaveSpeed = 0
+			t.WaterReflectance = 0
+			t.WaterTransparency = 0
+		end)
 	end
 
 	------------------------------------------------
-	-- ⚙️ OPTIMIZACIÓN GLOBAL (SIN DESTRUIR MAPA)
+	-- ⚙️ OPTIMIZACIÓN (SAFE)
 	------------------------------------------------
-	for _,v in pairs(game:GetDescendants()) do
+	for _,v in ipairs(game:GetDescendants()) do
 
 		if v:IsA("ParticleEmitter") or v:IsA("Trail") then
 			v.Enabled = false
@@ -55,43 +65,43 @@ local function UltraLowON()
 	end
 
 	------------------------------------------------
-	-- 🌳 LIMPIAR SOLO DECORACIÓN (NO MAPA)
+	-- 🌳 LIMPIAR DECORACIÓN (SAFE)
 	------------------------------------------------
-	for _,v in pairs(workspace:GetDescendants()) do
+	for _,v in ipairs(workspace:GetDescendants()) do
+		if v:IsA("Model") then
 
-		-- eliminar props típicos de lag
-		if v:IsA("Model") and not Players:GetPlayerFromCharacter(v) then
-			
-			local name = v.Name:lower()
+			local plr = Players:GetPlayerFromCharacter(v)
+			if not plr then
 
-			if string.find(name, "tree")
-			or string.find(name, "grass")
-			or string.find(name, "bush")
-			or string.find(name, "flower")
-			or string.find(name, "rock")
-			or string.find(name, "detail") then
+				local name = string.lower(v.Name)
 
-				v:Destroy()
+				if name:find("tree")
+				or name:find("grass")
+				or name:find("bush")
+				or name:find("flower")
+				or name:find("rock")
+				or name:find("detail") then
+
+					v:Destroy()
+				end
 			end
 		end
 	end
 
 	------------------------------------------------
-	-- 🧱 JUGADORES COMO BLOQUES
+	-- 🧱 JUGADORES SIMPLIFICADOS
 	------------------------------------------------
-	for _,plr in pairs(Players:GetPlayers()) do
-		if plr.Character then
+	for _,plr in ipairs(Players:GetPlayers()) do
+		local char = plr.Character
+		if char then
 
-			local char = plr.Character
-
-			-- ❌ accesorios
-			for _,v in pairs(char:GetChildren()) do
+			for _,v in ipairs(char:GetChildren()) do
 				if v:IsA("Accessory") then
 					v:Destroy()
 				end
 			end
 
-			for _,v in pairs(char:GetDescendants()) do
+			for _,v in ipairs(char:GetDescendants()) do
 
 				if v:IsA("MeshPart") then
 					v.TextureID = ""
@@ -103,7 +113,6 @@ local function UltraLowON()
 					v.CastShadow = false
 				end
 
-				-- ❌ animaciones
 				if v:IsA("Animator") or v:IsA("AnimationController") then
 					v:Destroy()
 				end
@@ -111,7 +120,9 @@ local function UltraLowON()
 
 			local hum = char:FindFirstChildOfClass("Humanoid")
 			if hum then
-				hum:ChangeState(Enum.HumanoidStateType.Physics)
+				pcall(function()
+					hum:ChangeState(Enum.HumanoidStateType.Physics)
+				end)
 			end
 		end
 	end
@@ -119,11 +130,17 @@ local function UltraLowON()
 	------------------------------------------------
 	-- 🚫 OCULTAR GUIS PESADAS
 	------------------------------------------------
-	for _,v in pairs(game:GetDescendants()) do
+	for _,v in ipairs(game:GetDescendants()) do
 		if v:IsA("BillboardGui") then
 			v.Enabled = false
 		end
 	end
 
-	print("😈 LEGNA FPS+ ACTIVADO (BALANCEADO)")
+	print("😈 LEGNA FPS+ ACTIVADO")
 end
+
+-- 🚀 AUTO EJECUCIÓN
+task.spawn(function()
+	wait(0.5)
+	UltraLowON()
+end)
