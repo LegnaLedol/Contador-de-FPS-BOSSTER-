@@ -1,38 +1,25 @@
--- 😈 LEGNA FPS DELTA FIX FULL
+-- 😈 LEGNA MODE DIABLO
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local Lighting = game:GetService("Lighting")
 local UIS = game:GetService("UserInputService")
 local Stats = game:GetService("Stats")
+local Lighting = game:GetService("Lighting")
 
 local plr = Players.LocalPlayer
 
 ------------------------------------------------
--- 🧍 FIX PERSONAJE (NO CAERSE)
-------------------------------------------------
-plr.CharacterAdded:Connect(function(char)
-	task.wait(1)
-	local hum = char:FindFirstChildOfClass("Humanoid")
-	if hum then
-		hum.PlatformStand = false
-		hum:ChangeState(Enum.HumanoidStateType.Running)
-	end
-end)
-
-------------------------------------------------
--- 📊 GUI CONTADOR
+-- 📊 CONTADOR FPS
 ------------------------------------------------
 local gui = Instance.new("ScreenGui")
-gui.Name = "LEGNA_FPS"
+gui.Name = "FPS_COUNTER"
 gui.ResetOnSpawn = false
 gui.Parent = plr:WaitForChild("PlayerGui")
 
 local frame = Instance.new("Frame", gui)
 frame.Size = UDim2.new(0,170,0,30)
 frame.Position = UDim2.new(0.02,0,0.2,0)
-frame.BackgroundColor3 = Color3.fromRGB(15,15,15)
-frame.BorderSizePixel = 0
+frame.BackgroundColor3 = Color3.fromRGB(20,20,20)
 
 local text = Instance.new("TextLabel", frame)
 text.Size = UDim2.new(1,0,1,0)
@@ -43,13 +30,12 @@ text.RichText = true
 text.TextXAlignment = Enum.TextXAlignment.Left
 
 ------------------------------------------------
--- 🎨 FPS REAL + RGB + PING
+-- 🎨 FPS + PING
 ------------------------------------------------
 local hue = 0
 
 RunService.RenderStepped:Connect(function(dt)
-	hue = (hue + dt * 0.5) % 1
-
+	hue = (hue + dt * 0.4) % 1
 	local fps = math.floor(1/dt)
 
 	local ping = 0
@@ -58,31 +44,22 @@ RunService.RenderStepped:Connect(function(dt)
 	end)
 
 	local rgb = Color3.fromHSV(hue,1,1)
-	local r = math.floor(rgb.R*255)
-	local g = math.floor(rgb.G*255)
-	local b = math.floor(rgb.B*255)
+	local r,g,b = math.floor(rgb.R*255), math.floor(rgb.G*255), math.floor(rgb.B*255)
 
 	local pingColor = "🟢"
-	if ping > 150 then
-		pingColor = "🔴"
-	elseif ping > 80 then
-		pingColor = "🟠"
-	end
+	if ping > 150 then pingColor = "🔴"
+	elseif ping > 80 then pingColor = "🟠" end
 
 	text.Text = string.format(
 		"<font color='rgb(%d,%d,%d)'>FPS</font> <font color='rgb(255,255,255)'>%d</font>   %s %d MS",
-		r,g,b,
-		fps,
-		pingColor,
-		ping
+		r,g,b,fps,pingColor,ping
 	)
 end)
 
 ------------------------------------------------
--- 🖱️ MOVER (DRAG)
+-- 🖱️ DRAG
 ------------------------------------------------
-local dragging = false
-local dragInput, startPos, startFramePos
+local dragging, dragInput, startPos, startFramePos = false
 
 frame.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -117,7 +94,7 @@ UIS.InputEnded:Connect(function(input)
 end)
 
 ------------------------------------------------
--- 🔥 ULTRA LOW (SEGURO)
+-- 😈 ULTRA LOW DIABLO
 ------------------------------------------------
 local activo = false
 
@@ -125,13 +102,15 @@ local function UltraLow()
 	if activo then return end
 	activo = true
 
+	-- cielo gris plano
+	Lighting.Brightness = 0.5
 	Lighting.GlobalShadows = false
 	Lighting.FogEnd = 1e9
-	Lighting.Brightness = 0.5
+	Lighting.Ambient = Color3.fromRGB(120,120,120)
+	Lighting.OutdoorAmbient = Color3.fromRGB(120,120,120)
 
+	-- optimizar mundo
 	for _,v in ipairs(workspace:GetDescendants()) do
-		if plr.Character and v:IsDescendantOf(plr.Character) then continue end
-
 		if v:IsA("BasePart") then
 			v.Material = Enum.Material.Plastic
 			v.CastShadow = false
@@ -150,22 +129,36 @@ local function UltraLow()
 		end
 	end
 
-	print("😈 ULTRA LOW ACTIVADO")
+	-- jugadores tipo maniquí
+	for _,p in ipairs(Players:GetPlayers()) do
+		if p.Character then
+			for _,v in ipairs(p.Character:GetDescendants()) do
+				if v:IsA("Accessory") then
+					v:Destroy()
+				end
+				if v:IsA("Shirt") or v:IsA("Pants") then
+					v:Destroy()
+				end
+			end
+		end
+	end
+
+	print("😈 MODO DIABLO ACTIVADO")
 end
 
 ------------------------------------------------
--- 🖱️ DOBLE CLICK
+-- 🖱️ DOBLE CLICK CONTADOR
 ------------------------------------------------
 local lastClick = 0
 
 frame.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
 		local now = tick()
-		if now - lastClick < 0.3 then
+		if now - lastClick <= 0.3 then
 			UltraLow()
 		end
 		lastClick = now
 	end
 end)
 
-print("😈 LEGNA DELTA READY")
+print("😈 LEGNA MODO DIABLO READY")
