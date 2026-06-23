@@ -1,97 +1,161 @@
-if not game:IsLoaded() then
-	game.Loaded:Wait()
-end
-
-local player = game.Players.LocalPlayer
-
-------------------------------------------------
--- 📊 FPS COUNTER SIMPLE
-------------------------------------------------
-local gui = Instance.new("ScreenGui")
-gui.Parent = player:WaitForChild("PlayerGui")
-
-local label = Instance.new("TextLabel")
-label.Size = UDim2.new(0, 180, 0, 40)
-label.Position = UDim2.new(0, 10, 0, 10)
-label.BackgroundColor3 = Color3.fromRGB(25,25,25)
-label.TextColor3 = Color3.fromRGB(255,255,255)
-label.Text = "FPS: ..."
-label.Parent = gui
+-- LEGNA PREMIUM HUD 😈✨
 
 local RunService = game:GetService("RunService")
-local frames = 0
-local last = tick()
+local Stats = game:GetService("Stats")
+local Lighting = game:GetService("Lighting")
+local UIS = game:GetService("UserInputService")
+local SoundService = game:GetService("SoundService")
 
-RunService.RenderStepped:Connect(function()
-	frames += 1
-	if tick() - last >= 1 then
-		label.Text = "FPS: " .. frames
-		frames = 0
-		last = tick()
-	end
-end)
+-- 🔥 BOOST BASE
+Lighting.GlobalShadows = false
+Lighting.FogEnd = 9e9
+Lighting.Brightness = 0
+settings().Rendering.QualityLevel = "Level01"
 
-------------------------------------------------
--- 🔥 ULTRA LOW (LIGHT MASSIVE VERSION)
-------------------------------------------------
-local function UltraLow()
+-- 🚀 BOOST ULTRA + SONIDO
+local function BoostUltra()
+    for _, v in pairs(game:GetDescendants()) do
+        if v:IsA("Part") or v:IsA("MeshPart") then
+            v.Material = Enum.Material.SmoothPlastic
+            v.Reflectance = 0
+        elseif v:IsA("Decal") or v:IsA("Texture") then
+            v:Destroy()
+        elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+            v:Destroy()
+        elseif v:IsA("Fire") or v:IsA("Smoke") then
+            v:Destroy()
+        end
+    end
 
-	for _,v in pairs(workspace:GetDescendants()) do
+    -- 🔊 SONIDO TURBO
+    local sound = Instance.new("Sound")
+    sound.SoundId = "rbxassetid://911342077"
+    sound.Volume = 1.5
+    sound.PlaybackSpeed = 1.05
+    sound.Parent = SoundService
+    sound:Play()
 
-		-- ❌ partículas y efectos
-		if v:IsA("ParticleEmitter") or v:IsA("Trail") then
-			v.Enabled = false
-		end
-
-		-- ❌ luces
-		if v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
-			v.Enabled = false
-		end
-
-		-- ⚠️ SOLO optimiza partes (NO elimina players)
-		if v:IsA("BasePart") then
-			v.CastShadow = false
-			v.Material = Enum.Material.Plastic
-			v.Reflectance = 0
-		end
-
-		-- ❌ solo “limpia” accesorios (NO borra players)
-		if v:IsA("Accessory") then
-			local handle = v:FindFirstChild("Handle")
-			if handle then
-				handle.CastShadow = false
-				handle.Material = Enum.Material.Plastic
-			end
-		end
-	end
-
-	local lighting = game:GetService("Lighting")
-
-	local sky = lighting:FindFirstChildOfClass("Sky")
-	if sky then sky:Destroy() end
-
-	lighting.GlobalShadows = false
-	lighting.FogEnd = 1e9
-	lighting.OutdoorAmbient = Color3.fromRGB(130,130,130)
-	lighting.Brightness = 1
-
-	print("🔥 ULTRA LOW LIGHT ACTIVATED")
+    task.delay(3, function()
+        sound:Destroy()
+    end)
 end
 
-------------------------------------------------
--- 📱 DOBLE TAP PARA ACTIVAR
-------------------------------------------------
-local lastTap = 0
+-- 🎯 GUI
+local gui = Instance.new("ScreenGui", game.CoreGui)
+gui.Name = "LEGNA_PREMIUM"
 
-label.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.Touch then
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 125, 0, 20)
+frame.Position = UDim2.new(0, 8, 0, 70)
+frame.BackgroundColor3 = Color3.fromRGB(10,10,10)
+frame.BackgroundTransparency = 0.25
+frame.BorderSizePixel = 0
+frame.Active = true
 
-		local now = tick()
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 6)
 
-		if now - lastTap <= 0.3 then
-			UltraLow()
-		end
+local stroke = Instance.new("UIStroke", frame)
+stroke.Color = Color3.fromRGB(40,40,40)
+stroke.Thickness = 1
+stroke.Transparency = 0.6
 
-		lastTap = now
-	end
+-- TEXTO
+local text = Instance.new("TextLabel", frame)
+text.Size = UDim2.new(0.82,0,1,0)
+text.Position = UDim2.new(0,6,0,0)
+text.BackgroundTransparency = 1
+text.TextScaled = true
+text.Font = Enum.Font.GothamSemibold
+text.TextXAlignment = Enum.TextXAlignment.Left
+
+-- BOTÓN
+local toggle = Instance.new("TextButton", frame)
+toggle.Size = UDim2.new(0.18,0,1,0)
+toggle.Position = UDim2.new(0.82,0,0,0)
+toggle.BackgroundTransparency = 1
+toggle.Text = ""
+
+local enabled = true
+
+toggle.MouseButton1Click:Connect(function()
+    enabled = not enabled
+    text.Visible = enabled
+
+    if enabled then
+        BoostUltra()
+    end
 end)
+
+-- 📱 DRAG SOLO EN FRAME (FIX BUG)
+local dragging = false
+local dragInput, dragStart, startPos
+
+frame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = frame.Position
+        dragInput = input
+    end
+end)
+
+frame.InputEnded:Connect(function(input)
+    if input == dragInput then
+        dragging = false
+    end
+end)
+
+UIS.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        frame.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+-- 🌈 RGB + FPS
+local hue = 0
+local fps = 0
+local frames = 0
+local lastTime = tick()
+
+RunService.RenderStepped:Connect(function()
+    frames += 1
+
+    if tick() - lastTime >= 1 then
+        fps = frames
+        frames = 0
+        lastTime = tick()
+    end
+
+    local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+
+    local msColor = Color3.fromRGB(0,255,120)
+    if ping > 180 then
+        msColor = Color3.fromRGB(255,60,60)
+    elseif ping > 100 then
+        msColor = Color3.fromRGB(255,170,60)
+    end
+
+    hue = (hue + 0.008) % 1
+    local rgb = Color3.fromHSV(hue,1,1)
+
+    text.RichText = true
+    text.Text =
+        "<font color='rgb("..
+        math.floor(rgb.R*255)..","..
+        math.floor(rgb.G*255)..","..
+        math.floor(rgb.B*255)..")'>L</font> "
+        .."<font color='rgb(255,255,255)'>"..fps.." FPS</font> | "
+        .."<font color='rgb("..
+        math.floor(msColor.R*255)..","..
+        math.floor(msColor.G*255)..","..
+        math.floor(msColor.B*255)..")'>"
+        ..ping.." MS</font>"
+end)
+
+print("😈 LEGNA PREMIUM ACTIVADO")
