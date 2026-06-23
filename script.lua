@@ -1,124 +1,121 @@
--- CARGAR TU CONTADOR ORIGINAL (LEGNA FPS+)
-loadstring(game:HttpGet("https://raw.githubusercontent.com/LegnaLedol/Contador-de-FPS-BOSSTER-/refs/heads/main/script.lua"))()
+pcall(function()
 
-repeat task.wait() until game.Players.LocalPlayer:FindFirstChild("PlayerGui")
-task.wait(2)
+	-- 🔥 CARGAR CONTADOR (PROTEGIDO)
+	local success, err = pcall(function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/LegnaLedol/Contador-de-FPS-BOSSTER-/refs/heads/main/script.lua"))()
+	end)
 
-local player = game.Players.LocalPlayer
-local gui = player:WaitForChild("PlayerGui")
-
-------------------------------------------------
--- 🔎 BUSCAR TU CONTADOR
-------------------------------------------------
-local contador = nil
-
-for _,v in pairs(gui:GetDescendants()) do
-	if v:IsA("TextLabel") then
-		if string.find(string.lower(v.Text), "fps") then
-			contador = v
-			break
-		end
-	end
-end
-
-if not contador then
-	warn("❌ No se detectó el contador FPS")
-	return
-end
-
-print("✅ Contador detectado")
-
-------------------------------------------------
--- 🔥 ULTRA LOW 9/10 (OPTIMIZADO BLOX FRUITS)
-------------------------------------------------
-local function UltraLow()
-
-	for _,v in pairs(workspace:GetDescendants()) do
-
-		-- ❌ partículas
-		if v:IsA("ParticleEmitter") or v:IsA("Trail") then
-			v.Enabled = false
-		end
-
-		-- ❌ luces
-		if v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
-			v.Enabled = false
-		end
-
-		-- ✔ optimizar partes SIN borrar mapa
-		if v:IsA("BasePart") then
-			v.CastShadow = false
-			v.Material = Enum.Material.Plastic
-			v.Reflectance = 0
-		end
-
+	if not success then
+		warn("❌ Error cargando RAW:", err)
 	end
 
-	-- 🌫️ cielo gris
-	local sky = game.Lighting:FindFirstChildOfClass("Sky")
-	if sky then sky:Destroy() end
+	-- ⏳ ESPERAR A QUE TODO CARGUE BIEN
+	repeat task.wait() until game:IsLoaded()
+	task.wait(3)
 
-	game.Lighting.GlobalShadows = false
-	game.Lighting.Brightness = 1
-	game.Lighting.FogEnd = 9e9
-	game.Lighting.OutdoorAmbient = Color3.fromRGB(120,120,120)
+	local player = game.Players.LocalPlayer
+	local gui = player:WaitForChild("PlayerGui")
 
-	print("🔥 ULTRA LOW ACTIVADO")
-end
+	------------------------------------------------
+	-- 🔎 DETECTAR CONTADOR (MEJORADO)
+	------------------------------------------------
+	local contador = nil
 
-------------------------------------------------
--- 🖱️ DOBLE CLICK (ACTIVA ULTRA LOW)
-------------------------------------------------
-local lastClick = 0
-local delay = 0.3
-
-contador.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		local now = tick()
-
-		if now - lastClick <= delay then
-			UltraLow()
-		end
-
-		lastClick = now
-	end
-end)
-
-------------------------------------------------
--- 🖱️ ARRASTRAR CONTADOR (SUAVE)
-------------------------------------------------
-local dragging = false
-local dragInput, dragStart, startPos
-
-contador.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragging = true
-		dragStart = input.Position
-		startPos = contador.Position
-
-		input.Changed:Connect(function()
-			if input.UserInputState == Enum.UserInputState.End then
-				dragging = false
+	for _,v in pairs(gui:GetDescendants()) do
+		if v:IsA("TextLabel") or v:IsA("TextButton") then
+			if v.Text and string.find(string.lower(v.Text), "fps") then
+				contador = v
+				break
 			end
-		end)
+		end
 	end
-end)
 
-contador.InputChanged:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseMovement then
-		dragInput = input
+	if not contador then
+		warn("❌ No se encontró el contador (tu RAW usa otro tipo)")
+		return
 	end
-end)
 
-game:GetService("UserInputService").InputChanged:Connect(function(input)
-	if input == dragInput and dragging then
-		local delta = input.Position - dragStart
+	print("✅ Contador detectado:", contador:GetFullName())
 
-		contador.Position = UDim2.new(
-			startPos.X.Scale,
-			startPos.X.Offset + delta.X,
-			startPos.Y.Scale,
-			startPos.Y.Offset + delta.Y
-		)
+	------------------------------------------------
+	-- 🔥 ULTRA LOW
+	------------------------------------------------
+	local function UltraLow()
+		for _,v in pairs(workspace:GetDescendants()) do
+
+			if v:IsA("ParticleEmitter") or v:IsA("Trail") then
+				v.Enabled = false
+			end
+
+			if v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
+				v.Enabled = false
+			end
+
+			if v:IsA("BasePart") then
+				v.CastShadow = false
+				v.Material = Enum.Material.Plastic
+			end
+		end
+
+		local sky = game.Lighting:FindFirstChildOfClass("Sky")
+		if sky then sky:Destroy() end
+
+		game.Lighting.GlobalShadows = false
+		game.Lighting.OutdoorAmbient = Color3.fromRGB(120,120,120)
+
+		print("🔥 ULTRA LOW ON")
 	end
+
+	------------------------------------------------
+	-- 🖱️ DOBLE CLICK
+	------------------------------------------------
+	local lastClick = 0
+
+	contador.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			local now = tick()
+
+			if now - lastClick <= 0.3 then
+				UltraLow()
+			end
+
+			lastClick = now
+		end
+	end)
+
+	------------------------------------------------
+	-- 🖱️ DRAG (ARREGLADO)
+	------------------------------------------------
+	local UIS = game:GetService("UserInputService")
+
+	local dragging = false
+	local dragStart, startPos
+
+	contador.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = true
+			dragStart = input.Position
+			startPos = contador.Position
+		end
+	end)
+
+	UIS.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = false
+		end
+	end)
+
+	UIS.InputChanged:Connect(function(input)
+		if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+			local delta = input.Position - dragStart
+
+			contador.Position = UDim2.new(
+				startPos.X.Scale,
+				startPos.X.Offset + delta.X,
+				startPos.Y.Scale,
+				startPos.Y.Offset + delta.Y
+			)
+		end
+	end)
+
 end)
