@@ -1,50 +1,43 @@
--- ✅ ESPERAR JUEGO
+-- esperar juego
 if not game:IsLoaded() then
 	game.Loaded:Wait()
 end
 
--- ✅ CARGAR TU RAW (CONTADOR)
-local success, err = pcall(function()
+-- cargar RAW
+pcall(function()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/LegnaLedol/Contador-de-FPS-BOSSTER-/refs/heads/main/script.lua"))()
 end)
-
-if not success then
-	warn("❌ Error cargando RAW:", err)
-end
-
-task.wait(3)
 
 local player = game.Players.LocalPlayer
 local gui = player:WaitForChild("PlayerGui")
 
 ------------------------------------------------
--- 🔎 DETECTAR CONTADOR (MEJOR PARA MÓVIL)
+-- 🔎 ESPERAR CONTADOR REAL
 ------------------------------------------------
 local contador
 
-for _,v in pairs(gui:GetDescendants()) do
-	if (v:IsA("TextLabel") or v:IsA("TextButton")) then
-		if v.Text and (#v.Text <= 10) then
-			if string.find(string.lower(v.Text), "fps") or string.find(v.Text, "%d+") then
-				contador = v
-				break
+task.spawn(function()
+	repeat
+		for _,v in pairs(gui:GetDescendants()) do
+			if v:IsA("TextLabel") then
+				if v.Text and string.match(v.Text, "^%d+$") then
+					contador = v
+					break
+				end
 			end
 		end
-	end
-end
+		task.wait(0.5)
+	until contador
+end)
 
-if not contador then
-	warn("❌ No se encontró el contador")
-	return
-end
+repeat task.wait() until contador
 
-print("✅ Contador detectado:", contador:GetFullName())
+print("✅ Contador encontrado:", contador)
 
 ------------------------------------------------
--- 🔥 ULTRA LOW (FULL OPTIMIZADO)
+-- 🔥 ULTRA LOW
 ------------------------------------------------
 local function UltraLow()
-
 	for _,v in pairs(workspace:GetDescendants()) do
 
 		if v:IsA("ParticleEmitter") or v:IsA("Trail") then
@@ -57,55 +50,44 @@ local function UltraLow()
 
 		if v:IsA("BasePart") then
 			v.Material = Enum.Material.Plastic
-			v.Reflectance = 0
 			v.CastShadow = false
+			v.Reflectance = 0
 		end
 	end
 
 	local lighting = game:GetService("Lighting")
 
-	-- quitar cielo
 	local sky = lighting:FindFirstChildOfClass("Sky")
 	if sky then sky:Destroy() end
 
-	-- ambiente plano gris
 	lighting.GlobalShadows = false
-	lighting.FogEnd = 9e9
 	lighting.OutdoorAmbient = Color3.fromRGB(120,120,120)
-	lighting.Brightness = 1
 
-	print("🔥 ULTRA LOW ACTIVADO")
+	print("🔥 ULTRA LOW ON")
 end
 
 ------------------------------------------------
--- 📱 DOBLE TAP (MÓVIL)
-------------------------------------------------
-local lastTap = 0
-
-contador.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.Touch then
-
-		local now = tick()
-
-		if now - lastTap <= 0.35 then
-			UltraLow()
-		end
-
-		lastTap = now
-	end
-end)
-
-------------------------------------------------
--- 📱 DRAG PARA MOVER (MÓVIL FIX)
+-- 📱 DOBLE TAP + DRAG FIX
 ------------------------------------------------
 local UIS = game:GetService("UserInputService")
 
+local lastTap = 0
 local dragging = false
 local dragStart
 local startPos
 
 contador.InputBegan:Connect(function(input)
+
 	if input.UserInputType == Enum.UserInputType.Touch then
+		
+		-- doble tap
+		local now = tick()
+		if now - lastTap <= 0.3 then
+			UltraLow()
+		end
+		lastTap = now
+
+		-- drag start
 		dragging = true
 		dragStart = input.Position
 		startPos = contador.Position
