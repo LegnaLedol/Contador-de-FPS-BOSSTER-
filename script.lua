@@ -1,7 +1,13 @@
--- 😈 LEGNA FPS+ AUTO EXEC
+-- 😈 LEGNA FPS+ FULL FIX
+
+-- 📊 CARGAR CONTADOR ORIGINAL
+pcall(function()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/LegnaLedol/Contador-de-FPS-BOSSTER-/refs/heads/main/script.lua"))()
+end)
 
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
+local CoreGui = game:GetService("CoreGui")
 
 local function UltraLowON()
 
@@ -16,11 +22,8 @@ local function UltraLowON()
 		Lighting.FogEnd = 1e10
 		Lighting.Brightness = 0.8
 		Lighting.GlobalShadows = false
-		Lighting.EnvironmentDiffuseScale = 0
-		Lighting.EnvironmentSpecularScale = 0
 	end)
 
-	-- eliminar sky
 	for _,v in ipairs(Lighting:GetChildren()) do
 		if v:IsA("Sky") then
 			v:Destroy()
@@ -28,7 +31,7 @@ local function UltraLowON()
 	end
 
 	------------------------------------------------
-	-- 💧 AGUA MUERTA
+	-- 💧 AGUA SIMPLE
 	------------------------------------------------
 	local t = workspace:FindFirstChildOfClass("Terrain")
 	if t then
@@ -41,9 +44,17 @@ local function UltraLowON()
 	end
 
 	------------------------------------------------
-	-- ⚙️ OPTIMIZACIÓN (SAFE)
+	-- ⚙️ OPTIMIZACIÓN (NO TOCAR GUI)
 	------------------------------------------------
 	for _,v in ipairs(game:GetDescendants()) do
+		
+		if v:IsDescendantOf(CoreGui) then
+			continue
+		end
+
+		if v:IsA("ScreenGui") or v:IsA("TextLabel") then
+			continue
+		end
 
 		if v:IsA("ParticleEmitter") or v:IsA("Trail") then
 			v.Enabled = false
@@ -59,42 +70,19 @@ local function UltraLowON()
 
 		elseif v:IsA("BasePart") then
 			v.Material = Enum.Material.Plastic
-			v.Reflectance = 0
 			v.CastShadow = false
+			v.Reflectance = 0
 		end
 	end
 
 	------------------------------------------------
-	-- 🌳 LIMPIAR DECORACIÓN (SAFE)
-	------------------------------------------------
-	for _,v in ipairs(workspace:GetDescendants()) do
-		if v:IsA("Model") then
-
-			local plr = Players:GetPlayerFromCharacter(v)
-			if not plr then
-
-				local name = string.lower(v.Name)
-
-				if name:find("tree")
-				or name:find("grass")
-				or name:find("bush")
-				or name:find("flower")
-				or name:find("rock")
-				or name:find("detail") then
-
-					v:Destroy()
-				end
-			end
-		end
-	end
-
-	------------------------------------------------
-	-- 🧱 JUGADORES SIMPLIFICADOS
+	-- 🧱 JUGADORES (SIN CAERSE)
 	------------------------------------------------
 	for _,plr in ipairs(Players:GetPlayers()) do
 		local char = plr.Character
 		if char then
 
+			-- quitar accesorios
 			for _,v in ipairs(char:GetChildren()) do
 				if v:IsA("Accessory") then
 					v:Destroy()
@@ -113,34 +101,23 @@ local function UltraLowON()
 					v.CastShadow = false
 				end
 
-				if v:IsA("Animator") or v:IsA("AnimationController") then
-					v:Destroy()
-				end
+				-- ❌ NO BORRAR Animator completamente
 			end
 
 			local hum = char:FindFirstChildOfClass("Humanoid")
 			if hum then
 				pcall(function()
-					hum:ChangeState(Enum.HumanoidStateType.Physics)
+					hum:ChangeState(Enum.HumanoidStateType.Running)
 				end)
 			end
 		end
 	end
 
-	------------------------------------------------
-	-- 🚫 OCULTAR GUIS PESADAS
-	------------------------------------------------
-	for _,v in ipairs(game:GetDescendants()) do
-		if v:IsA("BillboardGui") then
-			v.Enabled = false
-		end
-	end
-
-	print("😈 LEGNA FPS+ ACTIVADO")
+	print("😈 LEGNA FPS+ ACTIVADO (FPS OK)")
 end
 
--- 🚀 AUTO EJECUCIÓN
+-- 🚀 AUTO RUN
 task.spawn(function()
-	wait(0.5)
+	wait(1)
 	UltraLowON()
 end)
