@@ -1,26 +1,31 @@
--- 😈 LEGNA FPS+ FULL FIX
+-- 😈 LEGNA FPS+ FINAL (ESTABLE REAL)
 
--- 📊 CARGAR CONTADOR ORIGINAL
-pcall(function()
+-- 📊 CARGAR TU CONTADOR ORIGINAL
+local success = pcall(function()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/LegnaLedol/Contador-de-FPS-BOSSTER-/refs/heads/main/script.lua"))()
 end)
+
+print("FPS COUNTER:", success and "OK" or "ERROR")
 
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
 local CoreGui = game:GetService("CoreGui")
 
-local function UltraLowON()
+local UltraActivo = false
 
-	------------------------------------------------
+------------------------------------------------
+-- ⚙️ FUNCIÓN ULTRA LOW
+------------------------------------------------
+local function UltraLowON()
+	if UltraActivo then return end
+	UltraActivo = true
+
 	-- 🌫️ CIELO GRIS
-	------------------------------------------------
 	pcall(function()
 		Lighting.TimeOfDay = "12:00:00"
-		Lighting.Ambient = Color3.fromRGB(130,130,130)
-		Lighting.OutdoorAmbient = Color3.fromRGB(130,130,130)
-		Lighting.FogColor = Color3.fromRGB(160,160,160)
-		Lighting.FogEnd = 1e10
-		Lighting.Brightness = 0.8
+		Lighting.Ambient = Color3.fromRGB(120,120,120)
+		Lighting.OutdoorAmbient = Color3.fromRGB(120,120,120)
+		Lighting.FogColor = Color3.fromRGB(150,150,150)
 		Lighting.GlobalShadows = false
 	end)
 
@@ -30,9 +35,7 @@ local function UltraLowON()
 		end
 	end
 
-	------------------------------------------------
 	-- 💧 AGUA SIMPLE
-	------------------------------------------------
 	local t = workspace:FindFirstChildOfClass("Terrain")
 	if t then
 		pcall(function()
@@ -43,18 +46,10 @@ local function UltraLowON()
 		end)
 	end
 
-	------------------------------------------------
-	-- ⚙️ OPTIMIZACIÓN (NO TOCAR GUI)
-	------------------------------------------------
+	-- ⚙️ OPTIMIZACIÓN (SIN TOCAR GUI NI PLAYER)
 	for _,v in ipairs(game:GetDescendants()) do
 		
-		if v:IsDescendantOf(CoreGui) then
-			continue
-		end
-
-		if v:IsA("ScreenGui") or v:IsA("TextLabel") then
-			continue
-		end
+		if v:IsDescendantOf(CoreGui) then continue end
 
 		if v:IsA("ParticleEmitter") or v:IsA("Trail") then
 			v.Enabled = false
@@ -75,49 +70,37 @@ local function UltraLowON()
 		end
 	end
 
-	------------------------------------------------
-	-- 🧱 JUGADORES (SIN CAERSE)
-	------------------------------------------------
-	for _,plr in ipairs(Players:GetPlayers()) do
-		local char = plr.Character
-		if char then
+	print("😈 LEGNA FPS+ ACTIVADO")
+end
 
-			-- quitar accesorios
-			for _,v in ipairs(char:GetChildren()) do
-				if v:IsA("Accessory") then
-					v:Destroy()
-				end
-			end
+------------------------------------------------
+-- 🖱️ DOBLE CLICK EN CONTADOR
+------------------------------------------------
+task.spawn(function()
+	repeat task.wait() until game:IsLoaded()
 
-			for _,v in ipairs(char:GetDescendants()) do
+	local lastClick = 0
 
-				if v:IsA("MeshPart") then
-					v.TextureID = ""
-					v.Material = Enum.Material.Plastic
-				end
+	while true do
+		task.wait()
 
-				if v:IsA("BasePart") then
-					v.Material = Enum.Material.Plastic
-					v.CastShadow = false
-				end
-
-				-- ❌ NO BORRAR Animator completamente
-			end
-
-			local hum = char:FindFirstChildOfClass("Humanoid")
-			if hum then
-				pcall(function()
-					hum:ChangeState(Enum.HumanoidStateType.Running)
+		for _,gui in ipairs(CoreGui:GetDescendants()) do
+			if gui:IsA("TextLabel") and string.find(gui.Text, "FPS") then
+				
+				gui.InputBegan:Connect(function(input)
+					if input.UserInputType == Enum.UserInputType.MouseButton1 then
+						
+						local now = tick()
+						if now - lastClick < 0.3 then
+							UltraLowON()
+						end
+						lastClick = now
+					end
 				end)
+
+				print("FPS COUNTER DETECTADO ✔")
+				return
 			end
 		end
 	end
-
-	print("😈 LEGNA FPS+ ACTIVADO (FPS OK)")
-end
-
--- 🚀 AUTO RUN
-task.spawn(function()
-	wait(1)
-	UltraLowON()
 end)
