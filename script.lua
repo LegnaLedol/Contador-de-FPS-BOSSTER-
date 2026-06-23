@@ -1,8 +1,9 @@
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+
 local function UltraLowON()
 
-	------------------------------------------------
-	-- 🌫️ CIELO GRIS / SIN VIDA
-	------------------------------------------------
+	-- 🌫️ CIELO GRIS
 	Lighting.TimeOfDay = "12:00:00"
 	Lighting.Ambient = Color3.fromRGB(130,130,130)
 	Lighting.OutdoorAmbient = Color3.fromRGB(130,130,130)
@@ -19,9 +20,7 @@ local function UltraLowON()
 		end
 	end
 
-	------------------------------------------------
 	-- 💧 AGUA MUERTA
-	------------------------------------------------
 	local t = workspace:FindFirstChildOfClass("Terrain")
 	if t then
 		t.WaterWaveSize = 0
@@ -30,27 +29,16 @@ local function UltraLowON()
 		t.WaterTransparency = 0
 	end
 
-	------------------------------------------------
-	-- 💀 LIMPIEZA GLOBAL BRUTA
-	------------------------------------------------
+	-- 💀 LIMPIEZA GLOBAL
 	for _,v in pairs(game:GetDescendants()) do
-
-		-- ❌ efectos
 		if v:IsA("ParticleEmitter") or v:IsA("Trail") then
 			v.Enabled = false
-
 		elseif v:IsA("PostEffect") then
 			v.Enabled = false
-
-		-- ❌ luces
 		elseif v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
 			v.Enabled = false
-
-		-- ❌ texturas
 		elseif v:IsA("Texture") or v:IsA("Decal") then
 			v:Destroy()
-
-		-- ⚙️ partes ultra simples
 		elseif v:IsA("BasePart") then
 			v.Material = Enum.Material.Plastic
 			v.Reflectance = 0
@@ -58,60 +46,42 @@ local function UltraLowON()
 		end
 	end
 
-	------------------------------------------------
-	-- 💣 DESTRUIR MAPA PESADO (EXTREMO)
-	------------------------------------------------
+	-- 💣 DESTRUIR MAPA
 	for _,v in pairs(workspace:GetDescendants()) do
 		if v:IsA("Model") then
-
-			-- intenta detectar decoración
 			if not Players:GetPlayerFromCharacter(v) then
-
-				-- si tiene muchas partes = probablemente mapa
-				local count = #v:GetDescendants()
-
-				if count > 50 then
+				if #v:GetDescendants() > 50 then
 					v:Destroy()
 				end
 			end
 		end
 	end
 
-	------------------------------------------------
-	-- 🧱 JUGADORES COMO BLOQUES + SIN ACCESORIOS
-	------------------------------------------------
+	-- 🧱 JUGADORES MANIQUÍ
 	for _,plr in pairs(Players:GetPlayers()) do
 		if plr.Character then
-
 			local char = plr.Character
 
-			-- ❌ quitar accesorios
 			for _,v in pairs(char:GetChildren()) do
 				if v:IsA("Accessory") then
 					v:Destroy()
 				end
 			end
 
-			-- 🧱 convertir cuerpo
 			for _,v in pairs(char:GetDescendants()) do
-
 				if v:IsA("MeshPart") then
 					v.TextureID = ""
 					v.Material = Enum.Material.Plastic
 				end
-
 				if v:IsA("BasePart") then
 					v.Material = Enum.Material.Plastic
 					v.CastShadow = false
 				end
-
-				-- ❌ animaciones
 				if v:IsA("Animator") or v:IsA("AnimationController") then
 					v:Destroy()
 				end
 			end
 
-			-- 🧍 estado maniquí
 			local hum = char:FindFirstChildOfClass("Humanoid")
 			if hum then
 				hum:ChangeState(Enum.HumanoidStateType.Physics)
@@ -119,9 +89,7 @@ local function UltraLowON()
 		end
 	end
 
-	------------------------------------------------
-	-- 🚫 OCULTAR GUIS PESADAS
-	------------------------------------------------
+	-- 🚫 GUIS
 	for _,v in pairs(game:GetDescendants()) do
 		if v:IsA("BillboardGui") then
 			v.Enabled = false
@@ -130,3 +98,6 @@ local function UltraLowON()
 
 	print("💀 LEGNA FPS+ MODO DESTRUCCIÓN ACTIVADO")
 end
+
+-- 🔥 EJECUTAR
+UltraLowON()
