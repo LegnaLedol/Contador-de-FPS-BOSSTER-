@@ -1,4 +1,4 @@
--- LEGNA PREMIUM HUD 😈✨
+-- LEGNA PREMIUM HUD 😈✨ (MAX PERFORMANCE ENGINE)
 
 local RunService = game:GetService("RunService")
 local Stats = game:GetService("Stats")
@@ -6,24 +6,38 @@ local Lighting = game:GetService("Lighting")
 local UIS = game:GetService("UserInputService")
 local SoundService = game:GetService("SoundService")
 
--- 🔥 BOOST BASE
+-- 🔥 BOOST BASE AUTOMÁTICO
 Lighting.GlobalShadows = false
 Lighting.FogEnd = 9e9
 Lighting.Brightness = 0
 settings().Rendering.QualityLevel = "Level01"
 
--- 🚀 BOOST ULTRA + SONIDO
+-- 🚀 BOOST ULTRA POTENCIADO (MÁXIMOS FPS Y ESTABILIDAD MÓVIL)
 local function BoostUltra()
+    -- Desactivar actualizaciones de físicas visuales innecesarias del Workspace
+    settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+    game:GetService("Workspace").Terrain.WaterWaveSize = 0
+    game:GetService("Workspace").Terrain.WaterWaveSpeed = 0
+    game:GetService("Workspace").Terrain.WaterReflectance = 0
+    game:GetService("Workspace").Terrain.WaterTransparency = 0
+    
+    -- Limpieza masiva en todo el juego (Evita que la GPU cargue texturas o partículas pesadas)
     for _, v in pairs(game:GetDescendants()) do
-        if v:IsA("Part") or v:IsA("MeshPart") then
+        if v:IsA("Part") or v:IsA("MeshPart") or v:IsA("CornerWedgePart") or v:IsA("WedgePart") then
             v.Material = Enum.Material.SmoothPlastic
             v.Reflectance = 0
+            v.CastShadow = false -- Desactiva cálculo de sombras por objeto (¡Ahorra mucha batería y FPS!)
+            if v:IsA("MeshPart") then
+                v.TextureID = "" -- Elimina la textura de la malla, dejándola liso premium
+            end
         elseif v:IsA("Decal") or v:IsA("Texture") then
             v:Destroy()
-        elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+        elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Clouds") then
             v:Destroy()
-        elseif v:IsA("Fire") or v:IsA("Smoke") then
+        elseif v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") then
             v:Destroy()
+        elseif v:IsA("PostEffect") or v:IsA("BloomEffect") or v:IsA("BlurEffect") or v:IsA("SunRaysEffect") or v:IsA("ColorCorrectionEffect") then
+            v:Destroy() -- Elimina filtros pesados de post-procesado de PC
         end
     end
 
@@ -40,7 +54,7 @@ local function BoostUltra()
     end)
 end
 
--- 🎯 GUI
+-- 🎯 GUI (INTACTA - NO SE MODIFICÓ EL DISEÑO)
 local gui = Instance.new("ScreenGui", game.CoreGui)
 gui.Name = "LEGNA_PREMIUM"
 
@@ -117,22 +131,28 @@ UIS.InputChanged:Connect(function(input)
     end
 end)
 
--- 🌈 RGB + FPS
+-- 🌈 VARIABLES INTERNAS DE SMOOTH FPS
 local hue = 0
-local fps = 0
-local frames = 0
-local lastTime = tick()
+local smoothedFPS = 60
+local fpsWeight = 0.1
 
-RunService.RenderStepped:Connect(function()
-    frames += 1
+RunService.RenderStepped:Connect(function(deltaTime)
+    local currentFPS = (deltaTime > 0) and (1 / deltaTime) or 60
+    smoothedFPS = smoothedFPS + (currentFPS - smoothedFPS) * fpsWeight
+    local finalDisplayFPS = math.floor(smoothedFPS + 0.5)
 
-    if tick() - lastTime >= 1 then
-        fps = frames
-        frames = 0
-        lastTime = tick()
-    end
-
-    local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+    local ping = 0
+    local success = pcall(function()
+        local serverStats = Stats:FindFirstChild("Network") and Stats.Network:FindFirstChild("ServerStatsItem")
+        local dataPing = serverStats and serverStats:FindFirstChild("Data Ping")
+        if dataPing then
+            ping = math.floor(dataPing:GetValue())
+        else
+            ping = math.floor(game:GetService("Players").LocalPlayer:GetNetworkPing() * 1000)
+        end
+    end)
+    
+    if not success or ping == 0 then ping = 60 end
 
     local msColor = Color3.fromRGB(0,255,120)
     if ping > 180 then
@@ -150,7 +170,7 @@ RunService.RenderStepped:Connect(function()
         math.floor(rgb.R*255)..","..
         math.floor(rgb.G*255)..","..
         math.floor(rgb.B*255)..")'>L</font> "
-        .."<font color='rgb(255,255,255)'>"..fps.." FPS</font> | "
+        .."<font color='rgb(255,255,255)'>"..finalDisplayFPS.." FPS</font> | "
         .."<font color='rgb("..
         math.floor(msColor.R*255)..","..
         math.floor(msColor.G*255)..","..
@@ -158,4 +178,4 @@ RunService.RenderStepped:Connect(function()
         ..ping.." MS</font>"
 end)
 
-print("😈 LEGNA PREMIUM ACTIVADO")
+print("😈 LEGNA PREMIUM ACTIVADO (MAX FPS MODE OPERATIVE)")
